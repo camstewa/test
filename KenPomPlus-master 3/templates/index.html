@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>KenPom+</title>
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap-table.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/table.css') }}" rel="stylesheet">
+
+  </head>
+  <body>
+
+    <div class="jumbotron">
+        <div class="container">
+            <h1>KenPom+</h1>
+            <p class="tagline">Advanced Analysis of College Basketball</p>
+            <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle year-select" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                Change Year
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a href="/">2016</a></li>
+                <li><a href="/2015">2015</a></li>
+                <li><a href="/2014">2014</a></li>
+                <li><a href="/2013">2013</a></li>
+                <li><a href="/2012">2012</a></li>
+                <li><a href="/2011">2011</a></li>
+                <li><a href="/2010">2010</a></li>
+                <li><a href="/2009">2009</a></li>
+                <li><a href="/2008">2008</a></li>
+                <li><a href="/2007">2007</a></li>
+                <li><a href="/2006">2006</a></li>
+                <li><a href="/2005">2005</a></li>
+                <li><a href="/2004">2004</a></li>
+                <li><a href="/2003">2003</a></li>
+                <li><a href="/2002">2002</a></li>
+              </ul>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped" data-toggle="table"
+                                       data-search="true"                
+                                       data-show-refresh="true"
+                                       data-show-toggle="true"
+                                       data-show-columns="true"
+                                       data-show-export="true"
+                                       data-mobile-responsive="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">Rank</th>
+                <th data-sortable="true">Name</th>
+                <th data-sortable="true">Conference</th>
+                <th data-sortable="true">Win/Loss</th>
+                <th data-sortable="true">Pyth</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">AdjO</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">AdjD</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">AdjT</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="luckSorter">Luck</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">SoS Pyth</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">SoS Opp O</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">SoS Opp D</th>
+                <th data-sortable="true" data-formatter="rankFormatter" data-sorter="sorter">NCSoS Pyth</th>
+            </tr>
+        </thead>
+        <tbody id="team-body">
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.rank }}</td>
+                    <td class="team-name">{{ team.name }}</td>
+                    <td>{{ team.conference }}</td>
+                    <td>{{ team.win_loss }}</td>
+                    <td>{{ team.pyth }}</td>
+                    <td>{{ team.adj_o_rank }},{{ team.adj_o }}</td>
+                    <td>{{ team.adj_d_rank }},{{ team.adj_d }}</td>
+                    <td>{{ team.adj_t_rank }},{{ team.adj_t }}</td>
+                    <td>{{ team.luck_rank }},{{ team.luck }}</td>
+                    <td>{{ team.sos_pyth_rank }},{{ team.sos_pyth }}</td>
+                    <td>{{ team.sos_opp_o_rank }},{{ team.sos_opp_o }}</td>
+                    <td>{{ team.sos_opp_d_rank }},{{ team.sos_opp_d }}</td>
+                    <td>{{ team.ncsos_pyth_rank }},{{ team.ncsos_pyth }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-table.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-table-mobile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-table-export.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-table-export-plugin.js') }}"></script>
+    <script>
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function rankFormatter(value) {
+            var arr = value.split(',');
+            var rank = arr[0];
+            var val = arr[1];
+
+            // Covert to 0-100 scale
+            var n = (((rank - 1) * (100 - 1)) / (351 - 1)) + 1
+            var R = (255 * n) / 100;
+            var G = (255 * (100 - n)) / 100 ;
+
+            return '<span style="background-color: ' + rgbToHex(R, G, 0) + 
+                   '" class="label label-default rank-label">' +
+                   rank + '</span>' + val;
+        }
+
+        function sorter(a, b) {
+            a = a.split(',')[1];
+            b = b.split(',')[1];
+            return a - b;
+        }
+
+        function luckSorter(a, b) {
+            a = a.split(',')[1];
+            b = b.split(',')[1];
+
+            var a_sign = a[0];
+            var b_sign = b[0];
+
+            a = a.substring(1);
+            b = b.substring(1);
+
+            if(a_sign == '-') {
+                a = a * -1;
+            }
+            if(b_sign == '-') {
+                b = b * -1;
+            }
+            return a - b;
+        }
+        
+    </script>
+  </body>
+</html>
