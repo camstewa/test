@@ -1,0 +1,1 @@
+web: gunicorn kenpom:app --log-file=-
